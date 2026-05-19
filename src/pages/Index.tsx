@@ -6,28 +6,35 @@ import { ConsoleView } from "@/components/dashboard/ConsoleView"
 import { ServerControls } from "@/components/dashboard/ServerControls"
 import { Switch } from "@/components/ui/switch"
 import { useQuery } from "@tanstack/react-query"
-import { supabase } from "@/integrations/supabase/client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { toast } from "@/components/ui/use-toast"
+
+type Server = {
+  id: number
+  name: string
+  status: string
+  players: number
+  ram_usage: number
+  cpu_usage: number
+  egg_name?: string | null
+}
 
 const Index = () => {
   const { data: servers, isLoading, error } = useQuery({
     queryKey: ['servers'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('servers')
-        .select('*')
-      
-      if (error) {
+      const response = await fetch('/api/servers')
+
+      if (!response.ok) {
         toast({
           title: "Error",
           description: "Failed to fetch servers",
           variant: "destructive",
         })
-        throw error
+        throw new Error('Failed to fetch servers')
       }
-      
-      return data
+
+      return response.json() as Promise<Server[]>
     },
   })
 
@@ -80,6 +87,7 @@ const Index = () => {
                   <h3 className="text-lg font-medium mb-2">{server.name}</h3>
                   <div className="space-y-2 text-sm text-white/70">
                     <p>Status: {server.status}</p>
+                    <p>Egg: {server.egg_name || "Unassigned"}</p>
                     <p>Players: {server.players}</p>
                     <p>RAM Usage: {server.ram_usage}%</p>
                     <p>CPU Usage: {server.cpu_usage}%</p>
@@ -89,14 +97,14 @@ const Index = () => {
             </div>
           )}
 
-          <StatsCards />
+          <StatsCards servers={servers || []} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <PlayerChart />
+            <PlayerChart servers={servers || []} />
             <ConsoleView />
           </div>
 
-          <ServerControls />
+          <ServerControls servers={servers || []} />
         </div>
       </div>
     </DashboardLayout>
