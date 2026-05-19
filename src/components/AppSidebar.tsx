@@ -23,7 +23,6 @@ import {
   Lock,
   LogOut
 } from "lucide-react"
-import { supabase } from "@/integrations/supabase/client"
 import { useNavigate } from "react-router-dom"
 
 const menuItems = [
@@ -44,8 +43,8 @@ export function AppSidebar() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/login");
+    await fetch("/api/logout", { method: "POST" });
+    navigate("/login", { replace: true });
   };
 
   return (

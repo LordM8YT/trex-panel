@@ -4,8 +4,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import Login from "./pages/Login";
@@ -13,30 +11,24 @@ import Login from "./pages/Login";
 const queryClient = new QueryClient();
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
+    fetch("/api/session")
+      .then((response) => setAuthenticated(response.ok))
+      .catch(() => setAuthenticated(false));
   }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
+  if (authenticated === null) {
+    return (
+      <div className="min-h-screen bg-[#0A0B14] text-white flex items-center justify-center">
+        Loading panel...
+      </div>
+    );
   }
 
-  if (!session) {
-    return <Navigate to="/login" />;
+  if (!authenticated) {
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;
@@ -66,6 +58,7 @@ const App = () => (
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </TooltipProvider>

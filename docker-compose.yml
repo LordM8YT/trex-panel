@@ -1,0 +1,17 @@
+services:
+  trex-panel:
+    build:
+      context: .
+    image: trex-panel:latest
+    container_name: trex-panel
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      DB_HOST: ${DB_HOST:?Set DB_HOST before starting Trex Panel}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_USER: ${DB_USER:?Set DB_USER before starting Trex Panel}
+      DB_PASSWORD: ${DB_PASSWORD:-}
+      DB_NAME: ${DB_NAME:?Set DB_NAME before starting Trex Panel}
+      TREX_SECURE_COOKIES: ${TREX_SECURE_COOKIES:-false}
+    ports:
+      - "3000:3000"

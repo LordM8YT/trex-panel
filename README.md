@@ -1,70 +1,100 @@
-# Getting Started with Create React App
+# Trex Panel
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Trex Panel is a React/Vite frontend served by an Express API. The container is production-oriented: authentication, sessions, and server records are read from an external MySQL-compatible database that you provide.
 
-## Available Scripts
+This repository does not ship a database container, demo accounts, seed users, or sample server data.
 
-In the project directory, you can run:
+## Requirements
 
-### `npm start`
+- Docker Desktop on macOS or Docker Engine on Linux
+- Docker Compose v2
+- An external MySQL or MariaDB database
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Database
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Apply the schema in `database/schema.sql` to your database before starting the panel.
 
-### `npm test`
+The API expects:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- `users` for login accounts
+- `sessions` for active sessions
+- `servers` for server records displayed in the panel
 
-### `npm run build`
+To create a password hash for a user record:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm install
+npm run hash-password -- "your-secure-password"
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Insert the generated `password_hash` and `password_salt` into your own `users` row. No user is created automatically.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Environment
 
-### `npm run eject`
+Set these variables before starting the container:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+```text
+DB_HOST=your-db-host
+DB_PORT=3306
+DB_USER=your-db-user
+DB_PASSWORD=your-db-password
+DB_NAME=your-db-name
+TREX_SECURE_COOKIES=false
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+Use `TREX_SECURE_COOKIES=true` when serving the panel over HTTPS.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Run With Docker
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+```bash
+docker compose up --build
+```
 
-## Learn More
+Open:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```text
+http://localhost:3000
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Stop:
 
-### Code Splitting
+```bash
+docker compose down
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Build Docker Image Manually
 
-### Analyzing the Bundle Size
+```bash
+docker build -t trex-panel .
+docker run --rm -p 3000:3000 \
+  -e DB_HOST=your-db-host \
+  -e DB_PORT=3306 \
+  -e DB_USER=your-db-user \
+  -e DB_PASSWORD=your-db-password \
+  -e DB_NAME=your-db-name \
+  --name trex-panel \
+  trex-panel
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+## Local Development
 
-### Making a Progressive Web App
+```bash
+npm install
+npm run dev
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+Production build:
 
-### Advanced Configuration
+```bash
+npm run build
+npm start
+```
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+## API
 
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- `GET /api/health`
+- `POST /api/login`
+- `POST /api/logout`
+- `GET /api/session`
+- `GET /api/servers`
+- `POST /api/servers`

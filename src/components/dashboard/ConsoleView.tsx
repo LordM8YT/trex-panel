@@ -4,14 +4,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Terminal, Play, Square, RotateCw } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
-const consoleOutput = [
-  "[22:07:52] [Server thread/INFO] [minecraft/DedicatedServer]: LordMBYT has made the advancement [Warm and Cozy]",
-  "[22:10:36] [Server thread/INFO] [morpheus/]: MelixFelix is now sleeping. 1/2 (50%)",
-  "[22:28:40] [Server thread/INFO] [minecraft/DedicatedServer]: LordMBYT has made the advancement [A Seedy Place]",
-  "[22:30:05] [Server thread/INFO] [minecraft/DedicatedServer]: LordMBYT was slain by Zombie",
-  "[22:35:56] [Server thread/INFO] [minecraft/DedicatedServer]: LordMBYT was slain by Wilden Hunter"
-]
-
 export function ConsoleView() {
   return (
     <Card className="bg-[#0D0F1D] border-[#1E2433] text-white">
@@ -33,12 +25,8 @@ export function ConsoleView() {
         </div>
       </div>
       <ScrollArea className="h-[350px] rounded-md">
-        <div className="space-y-1 font-mono p-4 text-sm">
-          {consoleOutput.map((line, i) => (
-            <p key={i} className="text-white/70 hover:text-white transition-colors">
-              {line}
-            </p>
-          ))}
+        <div className="flex h-[350px] items-center justify-center p-4 text-sm text-white/50">
+          No console stream configured.
         </div>
       </ScrollArea>
       <div className="p-4 border-t border-[#1E2433]">

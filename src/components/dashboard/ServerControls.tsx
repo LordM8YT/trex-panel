@@ -3,7 +3,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ServerCog, Play, Square, RotateCw } from "lucide-react"
 
-export function ServerControls() {
+type ServerRecord = {
+  id: number
+  name: string
+  status: string
+  players: number
+}
+
+export function ServerControls({ servers = [] }: { servers?: ServerRecord[] }) {
   return (
     <Card className="bg-[#0D0F1D] border-[#1E2433] text-white">
       <div className="flex items-center justify-between p-6 border-b border-[#1E2433]">
@@ -27,18 +34,17 @@ export function ServerControls() {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-6">
-        {[
-          { name: "survival", status: "Running", players: 12, version: "1.20.1" },
-          { name: "creative", status: "Running", players: 5, version: "1.20.1" },
-          { name: "minigames", status: "Running", players: 3, version: "1.20.1" },
-          { name: "skyblock", status: "Maintenance", players: 0, version: "1.20.1" }
-        ].map((server, i) => (
-          <div key={i} className="p-4 rounded-lg bg-[#0A0B14] hover:bg-[#0D0F1D] transition-colors border border-[#1E2433]">
+        {servers.length === 0 ? (
+          <div className="col-span-full rounded-lg border border-[#1E2433] bg-[#0A0B14] p-6 text-center text-white/50">
+            No servers available.
+          </div>
+        ) : servers.map((server) => (
+          <div key={server.id} className="p-4 rounded-lg bg-[#0A0B14] hover:bg-[#0D0F1D] transition-colors border border-[#1E2433]">
             <div className="flex justify-between items-center mb-2">
               <span className="font-medium capitalize">{server.name}</span>
               <Badge 
                 variant="outline" 
-                className={server.status === "Running" 
+                className={server.status.toLowerCase() === "online"
                   ? "bg-emerald-500/10 text-emerald-500 border-0" 
                   : "bg-red-500/10 text-red-500 border-0"
                 }
@@ -48,7 +54,6 @@ export function ServerControls() {
             </div>
             <div className="space-y-1 text-sm text-white/50">
               <p>Players: {server.players}</p>
-              <p>Version: {server.version}</p>
             </div>
           </div>
         ))}
