@@ -18,7 +18,16 @@ The API expects:
 
 - `users` for login accounts
 - `sessions` for active sessions
+- `eggs` and `egg_variables` for game templates
 - `servers` for server records displayed in the panel
+
+## Game Support
+
+Trex Panel uses an egg model. Games are supported by adding egg definitions to the database or through `POST /api/eggs`.
+
+The repository does not bundle built-in eggs. This keeps the container generic and lets operators maintain their own game templates, Docker images, startup commands, variables, and config metadata.
+
+Servers can reference an egg through `servers.egg_id`.
 
 To create a password hash for a user record:
 
@@ -96,5 +105,7 @@ npm start
 - `POST /api/login`
 - `POST /api/logout`
 - `GET /api/session`
+- `GET /api/eggs`
+- `POST /api/eggs`
 - `GET /api/servers`
 - `POST /api/servers`

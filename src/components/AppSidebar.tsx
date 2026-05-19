@@ -20,6 +20,7 @@ import {
   Shield,
   Globe,
   Boxes,
+  PackageOpen,
   Lock,
   LogOut
 } from "lucide-react"
@@ -28,6 +29,7 @@ import { useNavigate } from "react-router-dom"
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/" },
   { title: "Admin", icon: Lock, url: "/admin" },
+  { title: "Eggs", icon: PackageOpen, url: "/eggs" },
   { title: "Servers", icon: Server, url: "/servers" },
   { title: "Players", icon: Users, url: "/players" },
   { title: "Console", icon: Terminal, url: "/console" },

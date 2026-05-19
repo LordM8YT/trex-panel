@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
+import Eggs from "./pages/Eggs";
 import Login from "./pages/Login";
 
 const queryClient = new QueryClient();
@@ -55,6 +56,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Admin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/eggs"
+            element={
+              <ProtectedRoute>
+                <Eggs />
               </ProtectedRoute>
             }
           />

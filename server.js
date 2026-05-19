@@ -168,8 +168,10 @@ app.get(
   requireAuth,
   asyncRoute(async (_req, res) => {
     const servers = await query(
-      `SELECT id, name, status, players, ram_usage, cpu_usage
+      `SELECT servers.id, servers.egg_id, servers.name, servers.status, servers.players,
+              servers.ram_usage, servers.cpu_usage, eggs.name AS egg_name
        FROM servers
+       LEFT JOIN eggs ON eggs.id = servers.egg_id
        ORDER BY id ASC`
     );
     res.json(servers);
@@ -180,26 +182,104 @@ app.post(
   '/api/servers',
   requireAuth,
   asyncRoute(async (req, res) => {
-    const { name, status, players = 0, ram_usage = 0, cpu_usage = 0 } = req.body;
+    const { egg_id = null, name, status, players = 0, ram_usage = 0, cpu_usage = 0 } = req.body;
 
     if (!name || !status) {
       return res.status(400).json({ error: 'Name and status are required' });
     }
 
     const result = await query(
-      `INSERT INTO servers (name, status, players, ram_usage, cpu_usage, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, NOW(), NOW())`,
-      [name, status, players, ram_usage, cpu_usage]
+      `INSERT INTO servers (egg_id, name, status, players, ram_usage, cpu_usage, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      [egg_id, name, status, players, ram_usage, cpu_usage]
     );
 
     res.status(201).json({
       id: result.insertId,
+      egg_id,
       name,
       status,
       players,
       ram_usage,
       cpu_usage,
     });
+  })
+);
+
+app.get(
+  '/api/eggs',
+  requireAuth,
+  asyncRoute(async (_req, res) => {
+    const eggs = await query(
+      `SELECT eggs.id, eggs.name, eggs.author, eggs.description, eggs.docker_image,
+              eggs.startup_command, eggs.config, COUNT(servers.id) AS server_count
+       FROM eggs
+       LEFT JOIN servers ON servers.egg_id = eggs.id
+       GROUP BY eggs.id
+       ORDER BY eggs.name ASC`
+    );
+
+    const variables = await query(
+      `SELECT id, egg_id, name, env_variable, default_value, user_viewable, user_editable, rules
+       FROM egg_variables
+       ORDER BY id ASC`
+    );
+
+    res.json(
+      eggs.map((egg) => ({
+        ...egg,
+        variables: variables.filter((variable) => variable.egg_id === egg.id),
+      }))
+    );
+  })
+);
+
+app.post(
+  '/api/eggs',
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    const {
+      name,
+      author = null,
+      description = null,
+      docker_image,
+      startup_command,
+      config = null,
+      variables = [],
+    } = req.body;
+
+    if (!name || !docker_image || !startup_command) {
+      return res.status(400).json({ error: 'Name, docker image, and startup command are required' });
+    }
+
+    const result = await query(
+      `INSERT INTO eggs (name, author, description, docker_image, startup_command, config, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+      [name, author, description, docker_image, startup_command, config ? JSON.stringify(config) : null]
+    );
+
+    for (const variable of variables) {
+      if (!variable.name || !variable.env_variable) {
+        continue;
+      }
+
+      await query(
+        `INSERT INTO egg_variables
+         (egg_id, name, env_variable, default_value, user_viewable, user_editable, rules, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [
+          result.insertId,
+          variable.name,
+          variable.env_variable,
+          variable.default_value ?? null,
+          variable.user_viewable ?? true,
+          variable.user_editable ?? true,
+          variable.rules ?? null,
+        ]
+      );
+    }
+
+    res.status(201).json({ id: result.insertId });
   })
 );
 

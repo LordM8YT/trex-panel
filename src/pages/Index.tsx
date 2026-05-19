@@ -16,6 +16,7 @@ type Server = {
   players: number
   ram_usage: number
   cpu_usage: number
+  egg_name?: string | null
 }
 
 const Index = () => {
@@ -86,6 +87,7 @@ const Index = () => {
                   <h3 className="text-lg font-medium mb-2">{server.name}</h3>
                   <div className="space-y-2 text-sm text-white/70">
                     <p>Status: {server.status}</p>
+                    <p>Egg: {server.egg_name || "Unassigned"}</p>
                     <p>Players: {server.players}</p>
                     <p>RAM Usage: {server.ram_usage}%</p>
                     <p>CPU Usage: {server.cpu_usage}%</p>
